@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 // Modules
 import { RoomModule } from './room/room.module';
+import { BookingModule } from './booking/booking.module';
 
 // Controllers & Services
 import { AppController } from './app.controller';
@@ -35,6 +36,7 @@ import LogsMiddleware from './middleware/logger.middleware';
     //   inject: [ConfigService]
     // }),
     RoomModule,
+    BookingModule
   ],
   controllers: [AppController],
   providers: [AppService]

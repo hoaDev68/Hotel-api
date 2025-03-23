@@ -1,6 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Customer } from 'src/schemas/customer.schema';
 import { BookingDetail } from 'src/schemas/booking-detail.schema';
 
 @Schema()
@@ -8,8 +7,17 @@ export class Booking {
   @Prop({ type: String, required: true, unique: true })
   bookingId: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true })
-  customer: Customer;
+  @Prop({ type: String, required: true })
+  customerName: string;
+
+  @Prop({ type: String, required: true })
+  email: string;
+
+  @Prop({ type: String, required: true })
+  phoneNumber: string;
+
+  @Prop({ type: String, required: true })
+  country: string;
 
   @Prop({ type: Date, required: true })
   checkInDate: Date;
