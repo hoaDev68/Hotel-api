@@ -4,8 +4,6 @@ import { BookingDetail } from 'src/schemas/booking-detail.schema';
 
 @Schema()
 export class Booking {
-  @Prop({ type: String, required: true, unique: true })
-  bookingId: string;
 
   @Prop({ type: String, required: true })
   customerName: string;
@@ -15,9 +13,6 @@ export class Booking {
 
   @Prop({ type: String, required: true })
   phoneNumber: string;
-
-  @Prop({ type: String, required: true })
-  country: string;
 
   @Prop({ type: Date, required: true })
   checkInDate: Date;

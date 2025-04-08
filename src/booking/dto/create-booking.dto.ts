@@ -11,9 +11,6 @@ import {
 import mongoose from 'mongoose';
 
 export class CreateBookingDto {
-  @IsNotEmpty()
-  @IsString()
-  bookingId: string;
 
   @IsNotEmpty()
   @IsString()
@@ -26,10 +23,6 @@ export class CreateBookingDto {
   @IsNotEmpty()
   @IsString()
   phoneNumber: string;
-
-  @IsNotEmpty()
-  @IsString()
-  country: string;
 
   @IsNotEmpty()
   checkInDate: Date;

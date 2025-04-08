@@ -19,20 +19,20 @@ export class BookingController {
   }
 
   @Get(':id')
-  async getBookingById(@Param('id') bookingId: string): Promise<Booking> {
-    return this.bookingService.getBookingById(bookingId);
+  async getBookingById(@Param('id') id: string): Promise<Booking> {
+    return this.bookingService.getBookingById(id);
   }
 
   @Put(':id')
   async updateBooking(
-    @Param('id') bookingId: string,
+    @Param('id') id: string,
     @Body() updateBookingDto: UpdateBookingDto,
   ): Promise<Booking> {
-    return this.bookingService.updateBooking(bookingId, updateBookingDto);
+    return this.bookingService.updateBooking(id, updateBookingDto);
   }
 
   @Delete(':id')
-  async deleteBooking(@Param('id') bookingId: string): Promise<void> {
-    return this.bookingService.deleteBooking(bookingId);
+  async deleteBooking(@Param('id') id: string): Promise<void> {
+    return this.bookingService.deleteBooking(id);
   }
 }

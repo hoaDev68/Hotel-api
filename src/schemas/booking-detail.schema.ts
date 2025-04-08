@@ -21,3 +21,5 @@ export class BookingDetail {
 }
 
 export const BookingDetailSchema = SchemaFactory.createForClass(BookingDetail);
+
+export type BookingDetailDocument = BookingDetail & Document;

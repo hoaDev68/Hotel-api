@@ -18,13 +18,10 @@ enum RoomStatus {
 }
 
 export class CreateRoomDto {
-  @IsNotEmpty()
-  @IsString()
-  roomId: string;
 
   @IsNotEmpty()
   @IsNumber()
-  roomNumber: number;
+  roomQuantity: number;
 
   @IsNotEmpty()
   @IsString()
@@ -37,6 +34,10 @@ export class CreateRoomDto {
   @IsNotEmpty()
   @IsNumber()
   capacity: number;
+
+  @IsNotEmpty()
+  @IsString()
+  image: string;
 
   @IsOptional()
   @IsString()

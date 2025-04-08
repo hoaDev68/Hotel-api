@@ -1,44 +1,108 @@
-import { Body, Controller, Post, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
-// import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RoomService } from './room.service';
-import { CreateRoomDto } from 'src/room/dto/create-room.dto';
+import { CreateRoomDto } from './dto/create-room.dto';
+// import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
 
 @Controller('room')
 export class RoomController {
   constructor(private roomService: RoomService) {}
 
-  @Get('/all')
- //@UseGuards(JwtAuthGuard)
-  async getAllRooms(
+  // ----------------------
+  // ✅ API: Admin - Lấy tất cả phòng
+  // ----------------------
+  @Get('/admin/all')
+  async getAllRoomsForAdmin() {
+    const data = await this.roomService.getAllRoomsForAdmin();
+    return {
+      message: 'Successfully retrieved all rooms (admin)',
+      data,
+    };
+  }
+
+  // ----------------------
+  // ✅ API: Client - Lấy các phòng còn trống
+  // ----------------------
+  @Get('/client/all')
+  async getAllRoomsForClient(
     @Query('checkInDate') checkInDate: string,
     @Query('checkOutDate') checkOutDate: string,
-    @Query('minCapacity') minCapacity: number
+    @Query('minCapacity') minCapacity?: number,
   ) {
-    const data = await this.roomService.getAllRooms(new Date(checkInDate), new Date(checkOutDate), Number(minCapacity));
-    return { message: 'Successfully retrieved room list', data };
+    const data = await this.roomService.getAllRoomsForClient(
+      new Date(checkInDate),
+      new Date(checkOutDate),
+    );
+
+    // Nếu muốn lọc theo minCapacity:
+    const filtered =
+      minCapacity != null
+        ? data.filter((room) => room.capacity >= minCapacity)
+        : data;
+
+    return {
+      message: 'Successfully retrieved available rooms (client)',
+      data: filtered,
+    };
   }
 
+  // ----------------------
+  // ✅ API: Lấy chi tiết phòng theo ID
+  // ----------------------
   @Get('/:roomId')
- //@UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getDetailRoom(@Param('roomId') roomId: string) {
     const data = await this.roomService.getDetailRoom(roomId);
-    return { message: 'Successfully retrieved room details', data };
+    return {
+      message: 'Successfully retrieved room details',
+      data,
+    };
   }
 
-  @Patch('/update-status/:roomId')
- //@UseGuards(JwtAuthGuard)
-  async updateRoomStatus(
-    @Param('roomId') roomId: string,
-    @Body() { checkInDate, checkOutDate, status }: { checkInDate: string; checkOutDate: string; status: string }
-  ) {
-    const data = await this.roomService.updateRoomStatus(roomId, new Date(checkInDate), new Date(checkOutDate), status);
-    return { message: 'Successfully updated room status', data };
-  }
-
+  // ----------------------
+  // ✅ API: Tạo mới phòng
+  // ----------------------
   @Post('/create')
- //@UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
     const data = await this.roomService.createRoom(createRoomDto);
-    return { message: 'Successfully created new room', data };
+    return {
+      message: 'Successfully created new room',
+      data,
+    };
+  }
+
+  // ----------------------
+  // ✅ API: Cập nhật trạng thái phòng
+  // ----------------------
+  @Patch('/update-status/:roomId')
+  // @UseGuards(JwtAuthGuard)
+  async updateRoomStatus(
+    @Param('roomId') roomId: string,
+    @Body()
+    {
+      checkInDate,
+      checkOutDate,
+      status,
+    }: { checkInDate: string; checkOutDate: string; status: string },
+  ) {
+    const data = await this.roomService.updateRoomStatus(
+      roomId,
+      new Date(checkInDate),
+      new Date(checkOutDate),
+      status,
+    );
+    return {
+      message: 'Successfully updated room status',
+      data,
+    };
   }
 }

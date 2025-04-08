@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Booking } from 'src/schemas/booking.schema';
@@ -19,20 +19,20 @@ export class BookingService {
   }
 
   async getAllBookings(): Promise<Booking[]> {
-    return this.bookingModel.find().populate(['customer', 'bookingDetails']);
+    return this.bookingModel.find().populate('bookingDetails'); // Xoá 'customer' nếu không có schema đó
   }
 
-  async getBookingById(bookingId: string): Promise<Booking> {
-    const booking = await this.bookingModel.findOne({ bookingId }).populate(['customer', 'bookingDetails']);
+  async getBookingById(id: string): Promise<Booking> {
+    const booking = await this.bookingModel.findById(id).populate('bookingDetails');
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
     return booking;
   }
 
-  async updateBooking(bookingId: string, updateBookingDto: UpdateBookingDto): Promise<Booking> {
-    const updatedBooking = await this.bookingModel.findOneAndUpdate(
-      { bookingId },
+  async updateBooking(id: string, updateBookingDto: UpdateBookingDto): Promise<Booking> {
+    const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+      id,
       updateBookingDto,
       { new: true }
     );
@@ -42,8 +42,8 @@ export class BookingService {
     return updatedBooking;
   }
 
-  async deleteBooking(bookingId: string): Promise<void> {
-    const deletedBooking = await this.bookingModel.findOneAndDelete({ bookingId });
+  async deleteBooking(id: string): Promise<void> {
+    const deletedBooking = await this.bookingModel.findByIdAndDelete(id);
     if (!deletedBooking) {
       throw new NotFoundException('Booking not found');
     }

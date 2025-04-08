@@ -4,14 +4,12 @@ import { BookingDetail } from 'src/schemas/booking-detail.schema';
 
 @Schema()
 export class Room {
-  @Prop({ type: String, required: true, unique: true })
-  roomId: string;
-
-  @Prop({ type: Number, required: true })
-  roomNumber: number;
 
   @Prop({ type: String, required: true })
   roomType: string;
+  
+  @Prop({ type: Number, required: true })
+  roomQuantity: number;
 
   @Prop({ type: Number, required: true })
   price: number;
@@ -21,6 +19,9 @@ export class Room {
 
   @Prop({ type: String, required: false })
   information?: string;
+
+  @Prop({ type: String, required: false })
+  image: string;
 
   @Prop({ type: String, required: false })
   description?: string;
