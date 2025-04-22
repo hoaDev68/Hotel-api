@@ -7,14 +7,16 @@ import {
   Patch,
   Query,
   UseGuards,
+  BadRequestException,
+  Delete
 } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-// import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Controller('room')
 export class RoomController {
-  constructor(private roomService: RoomService) {}
+  constructor(private roomService: RoomService) { }
 
   // ----------------------
   // ✅ API: Admin - Lấy tất cả phòng
@@ -37,22 +39,20 @@ export class RoomController {
     @Query('checkOutDate') checkOutDate: string,
     @Query('minCapacity') minCapacity?: number,
   ) {
-    const data = await this.roomService.getAllRoomsForClient(
-      new Date(checkInDate),
-      new Date(checkOutDate),
-    );
+    if (!checkInDate || !checkOutDate) {
+      throw new BadRequestException('Missing checkInDate or checkOutDate');
+    }
 
-    // Nếu muốn lọc theo minCapacity:
-    const filtered =
-      minCapacity != null
-        ? data.filter((room) => room.capacity >= minCapacity)
-        : data;
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
 
-    return {
-      message: 'Successfully retrieved available rooms (client)',
-      data: filtered,
-    };
+    if (checkIn >= checkOut) {
+      throw new BadRequestException('checkInDate must be before checkOutDate');
+    }
+
+    return await this.roomService.getAllRoomsForClient(checkIn, checkOut);
   }
+
 
   // ----------------------
   // ✅ API: Lấy chi tiết phòng theo ID
@@ -104,5 +104,22 @@ export class RoomController {
       message: 'Successfully updated room status',
       data,
     };
+  }
+
+  //cập nhạt 1 phòng theo id
+  @Patch(':id')
+  async updateRoomInfo(
+    @Param('id') id: string,
+    @Body() updateRoomDto: UpdateRoomDto,
+  ) {
+    return this.roomService.updateRoom(id, updateRoomDto);
+  }
+
+
+
+  //xóa 1 phòng theo id
+  @Delete(':id')
+  async deleteRoom(@Param('id') id: string) {
+    return this.roomService.deleteRoom(id);
   }
 }

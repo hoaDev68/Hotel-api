@@ -5,13 +5,14 @@ import {
   IsOptional,
   IsString,
   IsArray,
-  ValidateNested,
   IsEmail,
+  IsDate,
+  IsMongoId,
+  IsEnum,
 } from 'class-validator';
-import mongoose from 'mongoose';
+import { BookingStatus } from 'src/config/constant';
 
 export class CreateBookingDto {
-
   @IsNotEmpty()
   @IsString()
   customerName: string;
@@ -25,10 +26,18 @@ export class CreateBookingDto {
   phoneNumber: string;
 
   @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
   checkInDate: Date;
 
   @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
   checkOutDate: Date;
+
+  @IsOptional()
+  @IsEnum(BookingStatus)
+  status?: BookingStatus;
 
   @IsOptional()
   @IsNumber()
@@ -36,7 +45,6 @@ export class CreateBookingDto {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => mongoose.Schema.Types.ObjectId)
-  bookingDetails?: mongoose.Schema.Types.ObjectId[];
+  @IsMongoId({ each: true }) // Kiểm tra từng phần tử là ObjectId hợp lệ
+  bookingDetails?: string[];
 }

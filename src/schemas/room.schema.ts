@@ -14,6 +14,9 @@ export class Room {
   @Prop({ type: Number, required: true })
   price: number;
 
+  @Prop({ type: Number, required: false })
+  size?: number;
+
   @Prop({ type: Number, required: true })
   capacity: number;
 

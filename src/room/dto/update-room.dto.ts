@@ -17,31 +17,31 @@ enum RoomStatus {
   DA_DAT = 'DA_DAT',
 }
 
-export class CreateRoomDto {
+export class UpdateRoomDto {
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  roomQuantity: number;
+  roomQuantity?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  roomType: string;
+  roomType?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  price: number;
+  price?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  size: number;
+  size?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  capacity: number;
+  capacity?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  image: string;
+  image?: string;
 
   @IsOptional()
   @IsString()
@@ -51,9 +51,9 @@ export class CreateRoomDto {
   @IsString()
   description?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(RoomStatus) 
-  status: RoomStatus;
+  status?: RoomStatus;
 
   @IsOptional()
   @IsArray()

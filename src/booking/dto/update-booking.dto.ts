@@ -3,11 +3,11 @@ import {
   IsOptional,
   IsString,
   IsArray,
-  ValidateNested,
   IsEmail,
   IsNumber,
+  IsDate,
+  IsMongoId,
 } from 'class-validator';
-import mongoose from 'mongoose';
 
 export class UpdateBookingDto {
   @IsOptional()
@@ -27,9 +27,13 @@ export class UpdateBookingDto {
   country?: string;
 
   @IsOptional()
+  @Type(() => Date)
+  @IsDate()
   checkInDate?: Date;
 
   @IsOptional()
+  @Type(() => Date)
+  @IsDate()
   checkOutDate?: Date;
 
   @IsOptional()
@@ -38,7 +42,6 @@ export class UpdateBookingDto {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => mongoose.Schema.Types.ObjectId)
-  bookingDetails?: mongoose.Schema.Types.ObjectId[];
+  @IsMongoId({ each: true }) // đảm bảo mỗi ID là ObjectId hợp lệ
+  bookingDetails?: string[];
 }

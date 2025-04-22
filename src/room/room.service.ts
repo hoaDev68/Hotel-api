@@ -4,12 +4,15 @@ import { Model, Types } from 'mongoose';
 import { Room, RoomDocument } from 'src/schemas/room.schema';
 import { BookingDetail } from 'src/schemas/booking-detail.schema';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { Booking } from 'src/schemas/booking.schema';
+import { UpdateRoomDto } from './dto/update-room.dto';
 
 @Injectable()
 export class RoomService {
   constructor(
     @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
     @InjectModel(BookingDetail.name) private readonly bookingDetailModel: Model<BookingDetail>,
+    @InjectModel(Booking.name) private readonly bookingModel: Model<Booking>,
   ) {}
 
   async createRoom(createRoomDto: CreateRoomDto): Promise<Room> {
@@ -23,28 +26,30 @@ export class RoomService {
   }
 
   // Client: Lấy các phòng còn trống theo thời gian
-  async getAllRoomsForClient(checkInDate: Date, checkOutDate: Date): Promise<Room[]> {
-    // Tìm các bookingDetail liên quan tới khoảng thời gian bị trùng
-    const unavailableRoomStats = await this.bookingDetailModel.aggregate([
-      {
-        $lookup: {
-          from: 'bookings', // bảng booking
-          localField: '_id',
-          foreignField: 'bookingDetails', // nối qua mảng bookingDetails
-          as: 'bookingInfo',
-        },
-      },
-      { $unwind: '$bookingInfo' },
+  async getAllRoomsForClient(
+    checkInDate: Date,
+    checkOutDate: Date
+  ): Promise<{ room: Room; availableQuantity: number }[]> {
+    const result = await this.bookingModel.aggregate([
       {
         $match: {
-          'bookingInfo.checkInDate': { $lt: checkOutDate },  // start < end
-          'bookingInfo.checkOutDate': { $gt: checkInDate },  // end > start
+          checkInDate: { $lt: checkOutDate },
+          checkOutDate: { $gt: checkInDate },
         },
       },
       {
+        $lookup: {
+          from: 'bookingdetails',
+          localField: 'bookingDetails',
+          foreignField: '_id',
+          as: 'details',
+        },
+      },
+      { $unwind: '$details' },
+      {
         $group: {
-          _id: '$room',
-          totalBooked: { $sum: '$quantity' },
+          _id: '$details.room', // group theo roomId
+          totalBooked: { $sum: '$details.quantity' },
         },
       },
       {
@@ -57,31 +62,30 @@ export class RoomService {
       },
       { $unwind: '$roomInfo' },
       {
-        $match: {
-          $expr: { $gte: ['$totalBooked', '$roomInfo.roomQuantity'] }, // đã đặt >= tổng số phòng
+        $project: {
+          _id: 0,
+          room: '$roomInfo',
+          availableQuantity: {
+            $subtract: ['$roomInfo.roomQuantity', '$totalBooked'],
+          },
         },
-      },
-      {
-        $project: { _id: 1 }, // chỉ lấy _id của các phòng đã bị đặt hết
       },
     ]);
   
-    // Chuyển về Set để lọc nhanh
-    const unavailableRoomIdSet = new Set(unavailableRoomStats.map(r => r._id.toString()));
-  
-    // Lấy tất cả các phòng
+    // Lấy tất cả các phòng, đề phòng các phòng không nằm trong bất kỳ booking nào
     const allRooms = await this.roomModel.find();
   
-    // Lọc ra các phòng còn trống
-    const availableRooms = allRooms.filter(
-      room => !unavailableRoomIdSet.has(room._id.toString())
-    );
+    const resultMap = new Map(result.map(r => [r.room._id.toString(), r]));
   
-    return availableRooms;
+    const fullResult = allRooms.map(room => {
+      const data = resultMap.get(room._id.toString());
+      const availableQuantity = data ? Math.max(data.availableQuantity, 0) : room.roomQuantity;
+      return { room, availableQuantity };
+    });
+  
+    return fullResult.filter(r => r.availableQuantity > 0); // chỉ trả về phòng còn trống
   }
   
-  
-
   // Lấy chi tiết 1 phòng
   async getDetailRoom(id: string): Promise<Room> {
     if (!Types.ObjectId.isValid(id)) {
@@ -121,5 +125,33 @@ export class RoomService {
 
     room.status = status;
     return await room.save();
+  }
+  //cập nhật thông tin phòng theo id
+  async updateRoom(id: string, updateRoomDto: UpdateRoomDto): Promise<Room> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid room ID');
+    }
+
+    const room = await this.roomModel.findById(id);
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    Object.assign(room, updateRoomDto);
+    return await room.save();
+  }
+
+  //xóa 1 phòng theo id
+  async deleteRoom(id: string): Promise<Room> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid room ID');
+    }
+
+    const room = await this.roomModel.findByIdAndDelete(id);
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    return room;
   }
 }
