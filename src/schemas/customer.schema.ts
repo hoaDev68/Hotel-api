@@ -4,14 +4,9 @@ import { Booking } from 'src/schemas/booking.schema';
 
 @Schema()
 export class Customer {
-  @Prop({ type: String, required: true, unique: true })
-  customerId: string;
 
   @Prop({ type: String, required: true })
   fullName: string;
-
-  @Prop({ type: String, unique: true, required: true })
-  idCard: string;
 
   @Prop({ type: String, required: true })
   address: string;
